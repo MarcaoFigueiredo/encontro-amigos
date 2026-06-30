@@ -76,8 +76,9 @@
   <input id="firstName" placeholder="Nome"/>
   <input id="lastName" placeholder="Sobrenome"/>
 
-  <button onclick="reserve()">Reservar</button>
-</div>
+ <button onclick="cancelReserve()" style="background:#dc3545;">
+    Cancelar Reserva
+</button>
 
 <script>
 let selected = null;
@@ -159,37 +160,28 @@ function load() {
 
 }
 
-function reserve() {
+function cancelReserve() {
 
-  const first = document.getElementById("firstName").value.trim();
-  const last = document.getElementById("lastName").value.trim();
+  const month = document.getElementById("monthSelect").value;
+  const day = prompt("Digite o número do dia que deseja liberar:");
 
-  if (!first || !last) {
-    alert("Preencha nome e sobrenome!");
-    return;
-  }
+  if (!day) return;
 
-  if (!selected) {
-    alert("Escolha uma data!");
-    return;
-  }
-
-  const fullName = first + " " + last;
+  const k = key(month, day);
 
   const data = getData();
 
-  data[selected] = fullName;
+  if (!data[k]) {
+    alert("Esta data não está reservada.");
+    return;
+  }
 
-  saveData(data);
-
-  alert("Reserva feita com sucesso!");
-
-  selected = null;
-
-  document.getElementById("firstName").value = "";
-  document.getElementById("lastName").value = "";
-
-  load();
+  if (confirm(`Cancelar a reserva de ${data[k]}?`)) {
+    delete data[k];
+    saveData(data);
+    load();
+    alert("Reserva cancelada com sucesso!");
+  }
 
 }
 
