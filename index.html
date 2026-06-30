@@ -35,6 +35,7 @@
       width: 80px;
       cursor: pointer;
       border-radius: 5px;
+      user-select: none;
     }
 
     .selected {
@@ -72,7 +73,6 @@
 
   <div id="dates"></div>
 
-  <!-- 🔥 agora separado -->
   <input id="firstName" placeholder="Nome"/>
   <input id="lastName" placeholder="Sobrenome"/>
 
@@ -96,7 +96,7 @@ function saveData(data) {
 
 function generateMonth(month) {
   const year = new Date().getFullYear();
-  const days = new Date(year, month + 1, 0).getDate();
+  const days = new Date(year, Number(month) + 1, 0).getDate();
 
   let list = [];
   for (let i = 1; i <= days; i++) {
@@ -114,38 +114,53 @@ function load() {
   const days = generateMonth(month);
 
   days.forEach(day => {
+
     const k = key(month, day);
     const div = document.createElement("div");
     div.className = "date";
 
     if (data[k]) {
+
       div.innerText = `${day} - Reservado`;
 
-      // bloqueado visual
+      // Aparência de bloqueado
       div.style.opacity = "0.4";
-      div.style.pointerEvents = "none";
       div.style.background = "#f2f2f2";
       div.style.cursor = "not-allowed";
 
-      // 👀 admin: ver nome no hover
+      // Exibe quem reservou ao passar o mouse
       div.title = `Reservado por: ${data[k]}`;
 
+      // Não permite selecionar a data
+      div.onclick = function () {
+        return;
+      };
+
     } else {
+
       div.innerText = day;
 
-      div.onclick = () => {
+      div.onclick = function () {
+
         selected = k;
 
-        document.querySelectorAll(".date").forEach(d => d.classList.remove("selected"));
+        document.querySelectorAll(".date").forEach(function(d){
+          d.classList.remove("selected");
+        });
+
         div.classList.add("selected");
       };
+
     }
 
     container.appendChild(div);
+
   });
+
 }
 
 function reserve() {
+
   const first = document.getElementById("firstName").value.trim();
   const last = document.getElementById("lastName").value.trim();
 
@@ -162,16 +177,20 @@ function reserve() {
   const fullName = first + " " + last;
 
   const data = getData();
+
   data[selected] = fullName;
+
   saveData(data);
 
   alert("Reserva feita com sucesso!");
 
   selected = null;
+
   document.getElementById("firstName").value = "";
   document.getElementById("lastName").value = "";
 
   load();
+
 }
 
 load();
