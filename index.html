@@ -34,11 +34,7 @@
       display: inline-block;
       width: 80px;
       cursor: pointer;
-    }
-
-    .reserved {
-      background: #ffdddd;
-      cursor: not-allowed;
+      border-radius: 5px;
     }
 
     .selected {
@@ -120,8 +116,14 @@ function load() {
     div.className = "date";
 
     if (data[k]) {
-      div.classList.add("reserved");
-      div.innerText = `${day} - ${data[k]}`;
+      div.innerText = `${day} - Reservado`;
+
+      // 🔥 bloqueado e transparente
+      div.style.opacity = "0.4";
+      div.style.pointerEvents = "none";
+      div.style.background = "#f2f2f2";
+      div.style.cursor = "not-allowed";
+
     } else {
       div.innerText = day;
 
@@ -155,7 +157,9 @@ function reserve() {
   saveData(data);
 
   alert("Reserva feita com sucesso!");
+
   selected = null;
+  document.getElementById("name").value = "";
   load();
 }
 
