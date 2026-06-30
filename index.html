@@ -96,20 +96,13 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const dates = ["05/07","12/07","19/07","26/07"];
+  const dates = ["05/07", "12/07", "19/07", "26/07"];
 
   let selected = null;
 
-  async function loadDates() {
+  function renderDates(reserved) {
     const container = document.getElementById("dates");
     container.innerHTML = "";
-
-    const snap = await getDocs(collection(db, "reservas"));
-    const reserved = {};
-
-    snap.forEach(d => {
-      reserved[d.id] = d.data();
-    });
 
     dates.forEach(date => {
       const div = document.createElement("div");
@@ -124,8 +117,8 @@
         div.onclick = () => {
           selected = date;
 
-          document.querySelectorAll(".date").forEach(el => {
-            el.classList.remove("selected");
+          document.querySelectorAll(".date").forEach(d => {
+            d.classList.remove("selected");
           });
 
           div.classList.add("selected");
@@ -136,7 +129,18 @@
     });
   }
 
-  window.reserve = async function () {
+  async function loadDates() {
+    const snap = await getDocs(collection(db, "reservas"));
+
+    const reserved = {};
+    snap.forEach(d => {
+      reserved[d.id] = d.data();
+    });
+
+    renderDates(reserved);
+  }
+
+  async function reserve() {
     const name = document.getElementById("name").value;
 
     if (!selected) {
@@ -155,7 +159,9 @@
 
     selected = null;
     loadDates();
-  };
+  }
+
+  window.reserve = reserve;
 
   loadDates();
 </script>
