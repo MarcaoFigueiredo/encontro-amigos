@@ -1,3 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Encontro dos Amigos</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .date {
+      padding: 10px;
+      margin: 8px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .date:hover {
+      background: #e0f7fa;
+    }
+
+    .selected {
+      background: #c8f7c5;
+    }
+
+    .reserved {
+      background: #ffdddd;
+      cursor: not-allowed;
+    }
+
+    input, button {
+      padding: 10px;
+      width: 90%;
+      margin-top: 10px;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>🍻 Encontro dos Amigos</h1>
+
+  <div id="dates"></div>
+
+  <input id="name" type="text" placeholder="Seu nome"/>
+  <button onclick="reserve()">Reservar</button>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
   import {
@@ -22,23 +98,18 @@
 
   const dates = ["05/07","12/07","19/07","26/07"];
 
-  let selected = "";
-
-  function setSelected(date) {
-    selected = date;
-    alert("Data selecionada: " + date);
-  }
+  let selected = null;
 
   async function loadDates() {
+    const container = document.getElementById("dates");
+    container.innerHTML = "";
+
     const snap = await getDocs(collection(db, "reservas"));
     const reserved = {};
 
     snap.forEach(d => {
       reserved[d.id] = d.data();
     });
-
-    const container = document.getElementById("dates");
-    container.innerHTML = "";
 
     dates.forEach(date => {
       const div = document.createElement("div");
@@ -49,7 +120,16 @@
         div.innerText = `${date} - Reservado por ${reserved[date].name}`;
       } else {
         div.innerText = `${date} - Livre`;
-        div.onclick = () => setSelected(date);
+
+        div.onclick = () => {
+          selected = date;
+
+          document.querySelectorAll(".date").forEach(el => {
+            el.classList.remove("selected");
+          });
+
+          div.classList.add("selected");
+        };
       }
 
       container.appendChild(div);
@@ -73,9 +153,12 @@
       name: name
     });
 
-    selected = "";
+    selected = null;
     loadDates();
   };
 
   loadDates();
 </script>
+
+</body>
+</html>
