@@ -15,29 +15,25 @@
 
     .container {
       background: white;
-      max-width: 500px;
+      max-width: 600px;
       margin: auto;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    select, input, button {
+      padding: 10px;
+      width: 90%;
+      margin-top: 10px;
     }
 
     .date {
       padding: 10px;
-      margin: 6px;
+      margin: 5px;
       border: 1px solid #ddd;
-      border-radius: 8px;
-      cursor: pointer;
       display: inline-block;
       width: 80px;
-    }
-
-    .date:hover {
-      background: #e0f7fa;
-    }
-
-    .selected {
-      background: #c8f7c5;
+      cursor: pointer;
     }
 
     .reserved {
@@ -45,10 +41,8 @@
       cursor: not-allowed;
     }
 
-    input, button {
-      padding: 10px;
-      width: 90%;
-      margin-top: 10px;
+    .selected {
+      background: #c8f7c5;
     }
 
     button {
@@ -56,11 +50,6 @@
       color: white;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
     }
   </style>
 </head>
@@ -70,69 +59,81 @@
 <div class="container">
   <h1>🍻 Encontro dos Amigos</h1>
 
+  <select id="monthSelect" onchange="load()">
+    <option value="0">Janeiro</option>
+    <option value="1">Fevereiro</option>
+    <option value="2">Março</option>
+    <option value="3">Abril</option>
+    <option value="4">Maio</option>
+    <option value="5">Junho</option>
+    <option value="6" selected>Julho</option>
+    <option value="7">Agosto</option>
+    <option value="8">Setembro</option>
+    <option value="9">Outubro</option>
+    <option value="10">Novembro</option>
+    <option value="11">Dezembro</option>
+  </select>
+
   <div id="dates"></div>
 
-  <input id="name" type="text" placeholder="Seu nome"/>
+  <input id="name" placeholder="Seu nome"/>
   <button onclick="reserve()">Reservar</button>
 </div>
 
 <script>
 let selected = null;
 
-function getReservations() {
+function key(month, day) {
+  return `${month}-${day}`;
+}
+
+function getData() {
   return JSON.parse(localStorage.getItem("reservas") || "{}");
 }
 
-function saveReservations(data) {
+function saveData(data) {
   localStorage.setItem("reservas", JSON.stringify(data));
 }
 
-// 🔥 GERA TODO O MÊS AUTOMATICAMENTE
-function gerarMesAtual() {
-  const hoje = new Date();
-  const ano = hoje.getFullYear();
-  const mes = hoje.getMonth();
+function generateMonth(month) {
+  const year = new Date().getFullYear();
+  const days = new Date(year, month + 1, 0).getDate();
 
-  const diasNoMes = new Date(ano, mes + 1, 0).getDate();
-
-  const lista = [];
-
-  for (let dia = 1; dia <= diasNoMes; dia++) {
-    const d = String(dia).padStart(2, "0");
-    const m = String(mes + 1).padStart(2, "0");
-    lista.push(`${d}/${m}`);
+  let list = [];
+  for (let i = 1; i <= days; i++) {
+    list.push(i);
   }
-
-  return lista;
+  return list;
 }
 
-const dates = gerarMesAtual();
-
 function load() {
+  const month = document.getElementById("monthSelect").value;
   const container = document.getElementById("dates");
   container.innerHTML = "";
 
-  const reserved = getReservations();
+  const data = getData();
+  const days = generateMonth(month);
 
-  dates.forEach(d => {
-    const el = document.createElement("div");
-    el.className = "date";
+  days.forEach(day => {
+    const k = key(month, day);
+    const div = document.createElement("div");
+    div.className = "date";
 
-    if (reserved[d]) {
-      el.classList.add("reserved");
-      el.innerText = `${d} - ${reserved[d]}`;
+    if (data[k]) {
+      div.classList.add("reserved");
+      div.innerText = `${day} - ${data[k]}`;
     } else {
-      el.innerText = d;
+      div.innerText = day;
 
-      el.onclick = () => {
-        selected = d;
+      div.onclick = () => {
+        selected = k;
 
-        document.querySelectorAll(".date").forEach(x => x.classList.remove("selected"));
-        el.classList.add("selected");
+        document.querySelectorAll(".date").forEach(d => d.classList.remove("selected"));
+        div.classList.add("selected");
       };
     }
 
-    container.appendChild(el);
+    container.appendChild(div);
   });
 }
 
@@ -149,14 +150,12 @@ function reserve() {
     return;
   }
 
-  const reserved = getReservations();
-  reserved[selected] = name;
-  saveReservations(reserved);
+  const data = getData();
+  data[selected] = name;
+  saveData(data);
 
-  alert("Reserva feita: " + selected);
-
+  alert("Reserva feita com sucesso!");
   selected = null;
-  document.getElementById("name").value = "";
   load();
 }
 
