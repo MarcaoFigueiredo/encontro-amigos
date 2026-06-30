@@ -185,6 +185,24 @@ function cancelReserve() {
 
 }
 
+function clearOldReservations() {
+
+  const currentMonth = new Date().getMonth();
+  const data = getData();
+
+  Object.keys(data).forEach(key => {
+    const month = parseInt(key.split("-")[0]);
+
+    if (month !== currentMonth) {
+      delete data[key];
+    }
+  });
+
+  saveData(data);
+
+}
+  
+clearOldReservations();
 load();
 </script>
 
