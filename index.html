@@ -24,10 +24,12 @@
 
     .date {
       padding: 10px;
-      margin: 8px;
+      margin: 6px;
       border: 1px solid #ddd;
       border-radius: 8px;
       cursor: pointer;
+      display: inline-block;
+      width: 80px;
     }
 
     .date:hover {
@@ -75,7 +77,6 @@
 </div>
 
 <script>
-const dates = ["05/07","12/07","19/07","26/07"];
 let selected = null;
 
 function getReservations() {
@@ -85,6 +86,27 @@ function getReservations() {
 function saveReservations(data) {
   localStorage.setItem("reservas", JSON.stringify(data));
 }
+
+// 🔥 GERA TODO O MÊS AUTOMATICAMENTE
+function gerarMesAtual() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = hoje.getMonth();
+
+  const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+
+  const lista = [];
+
+  for (let dia = 1; dia <= diasNoMes; dia++) {
+    const d = String(dia).padStart(2, "0");
+    const m = String(mes + 1).padStart(2, "0");
+    lista.push(`${d}/${m}`);
+  }
+
+  return lista;
+}
+
+const dates = gerarMesAtual();
 
 function load() {
   const container = document.getElementById("dates");
@@ -98,9 +120,9 @@ function load() {
 
     if (reserved[d]) {
       el.classList.add("reserved");
-      el.innerText = `${d} - Reservado por ${reserved[d]}`;
+      el.innerText = `${d} - ${reserved[d]}`;
     } else {
-      el.innerText = d + " - Livre";
+      el.innerText = d;
 
       el.onclick = () => {
         selected = d;
@@ -131,7 +153,7 @@ function reserve() {
   reserved[selected] = name;
   saveReservations(reserved);
 
-  alert("Reserva feita: " + selected + " por " + name);
+  alert("Reserva feita: " + selected);
 
   selected = null;
   document.getElementById("name").value = "";
