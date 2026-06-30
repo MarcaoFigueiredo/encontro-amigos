@@ -7,28 +7,24 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       background: #f5f5f5;
       text-align: center;
       padding: 20px;
     }
 
-    h1 {
-      color: #333;
-    }
-
     .container {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
       max-width: 500px;
       margin: auto;
+      padding: 20px;
+      border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     .date {
       padding: 10px;
-      margin: 10px;
+      margin: 8px;
       border: 1px solid #ddd;
       border-radius: 8px;
       cursor: pointer;
@@ -38,15 +34,18 @@
       background: #e0f7fa;
     }
 
-    input {
+    .reserved {
+      background: #ffdddd;
+      cursor: not-allowed;
+    }
+
+    input, button {
       padding: 10px;
       width: 90%;
       margin-top: 10px;
     }
 
     button {
-      margin-top: 10px;
-      padding: 10px 20px;
       background: #007bff;
       color: white;
       border: none;
@@ -62,19 +61,98 @@
 
 <body>
 
-  <div class="container">
-    <h1>🍻 Encontro dos Amigos</h1>
-    <p>Escolha uma data:</p>
+<div class="container">
+  <h1>🍻 Encontro dos Amigos</h1>
 
-    <div class="date">05/07 - Livre</div>
-    <div class="date">12/07 - Livre</div>
-    <div class="date">19/07 - Livre</div>
-    <div class="date">26/07 - Livre</div>
+  <div id="dates"></div>
 
-    <input type="text" placeholder="Seu nome" />
+  <input id="name" type="text" placeholder="Seu nome"/>
+  <button onclick="reserve()">Reservar</button>
+</div>
 
-    <button>Reservar</button>
-  </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    doc,
+    getDocs,
+    setDoc
+  } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCo-xs9qyIfSQ3Q_MsuHnBsh1egMVMrzKY",
+    authDomain: "encontro-dos-amigos-466a2.firebaseapp.com",
+    projectId: "encontro-dos-amigos-466a2",
+    storageBucket: "encontro-dos-amigos-466a2.firebasestorage.app",
+    messagingSenderId: "961408725030",
+    appId: "1:961408725030:web:31e1f98ab667c8517176e7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const dates = [
+    "05/07",
+    "12/07",
+    "19/07",
+    "26/07"
+  ];
+
+  let selected = null;
+
+  async function loadDates() {
+    const snap = await getDocs(collection(db, "reservas"));
+    const reserved = {};
+    snap.forEach(doc => {
+      reserved[doc.id] = doc.data();
+    });
+
+    const container = document.getElementById("dates");
+    container.innerHTML = "";
+
+    dates.forEach(date => {
+      const div = document.createElement("div");
+      div.className = "date";
+
+      if (reserved[date]) {
+        div.classList.add("reserved");
+        div.innerText = `${date} - Reservado por ${reserved[date].name}`;
+      } else {
+        div.innerText = `${date} - Livre`;
+        div.onclick = () => {
+          selected = date;
+          alert("Data selecionada: " + date);
+        };
+      }
+
+      container.appendChild(div);
+    });
+  }
+
+  window.reserve = async function () {
+    const name = document.getElementById("name").value;
+
+    if (!selected) {
+      alert("Escolha uma data!");
+      return;
+    }
+
+    if (!name) {
+      alert("Digite seu nome!");
+      return;
+    }
+
+    await setDoc(doc(db, "reservas", selected), {
+      name: name
+    });
+
+    selected = null;
+    loadDates();
+  };
+
+  loadDates();
+</script>
 
 </body>
 </html>
