@@ -71,7 +71,7 @@
   <div id="dates"></div>
 
   <input id="name" type="text" placeholder="Seu nome"/>
-  <button onclick="reserve()">Reservar</button>
+  <button id="btnReserve">Reservar</button>
 </div>
 
 <script type="module">
@@ -161,7 +161,7 @@
     loadDates();
   }
 
-  window.reserve = reserve;
+  document.getElementById("btnReserve").addEventListener("click", reserve);
 
   loadDates();
 </script>
